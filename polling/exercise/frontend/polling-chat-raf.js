@@ -3,6 +3,7 @@ const msgs = document.getElementById("msgs");
 
 // let's store all current messages here
 let allChat = [];
+let timeBeforeNextCall = 0;
 
 // the interval to poll at in milliseconds
 const INTERVAL = 3000;
@@ -42,7 +43,6 @@ async function getNewMsgs() {
 
   allChat = messages.msg;
   render();
-  setTimeout(getNewMsgs, INTERVAL);
 }
 
 function render() {
@@ -58,5 +58,15 @@ function render() {
 const template = (user, msg) =>
   `<li class="collection-item"><span class="badge">${user}</span>${msg}</li>`;
 
+// time parameter is provided back from the requestAnimationFrame function
+async function rafTimer(time) {
+  if (timeBeforeNextCall <= time) {
+    await getNewMsgs();
+    timeBeforeNextCall = time + INTERVAL;
+  }
+
+  requestAnimationFrame(rafTimer);
+};
+
 // make the first request
-getNewMsgs();
+requestAnimationFrame(rafTimer);
